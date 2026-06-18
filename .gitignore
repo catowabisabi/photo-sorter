@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Build output
+build/
+dist/
+*.spec.bak
+
+# Local model caches and large artifacts
+models/
+*.onnx
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

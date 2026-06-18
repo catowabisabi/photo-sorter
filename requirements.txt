@@ -1,0 +1,11 @@
+numpy
+pillow
+scikit-learn
+torch
+torchvision
+transformers
+timm
+insightface
+onnxruntime
+opencv-python
+pyinstaller
