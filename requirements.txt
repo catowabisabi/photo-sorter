@@ -1,5 +1,6 @@
 numpy
 pillow
+customtkinter
 scikit-learn
 torch
 torchvision
