@@ -10,9 +10,11 @@ from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 import numpy as np
-from PIL import ExifTags, Image
+from PIL import ExifTags, Image, ImageFile
 from sklearn.cluster import DBSCAN
 
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 APP_NAME = "Photo Sorter"
 APP_VERSION = "2.0"
@@ -571,22 +573,25 @@ class PhotoSorterApp(ctk.CTk):
         return best >= threshold, best
 
     def classify_image(self, path: Path, labels: list[tuple[str, str]]) -> tuple[str, str]:
-        has_person, score = self.detect_person(path)
-        if has_person:
-            return PERSON, f"person={score:.3f}"
+        try:
+            has_person, score = self.detect_person(path)
+            if has_person:
+                return PERSON, f"person={score:.3f}"
 
-        prompts = [prompt for _folder, prompt in labels]
-        result = self.clip_classifier(str(path), candidate_labels=prompts)
-        prompt_to_folder = {prompt: folder for folder, prompt in labels}
-        top = result[0]
-        second = float(result[1]["score"]) if len(result) > 1 else 0.0
-        score = float(top["score"])
-        gap = score - second
-        folder_label = prompt_to_folder[str(top["label"])]
+            prompts = [prompt for _folder, prompt in labels]
+            result = self.clip_classifier(str(path), candidate_labels=prompts)
+            prompt_to_folder = {prompt: folder for folder, prompt in labels}
+            top = result[0]
+            second = float(result[1]["score"]) if len(result) > 1 else 0.0
+            score = float(top["score"])
+            gap = score - second
+            folder_label = prompt_to_folder[str(top["label"])]
 
-        if score < 0.55 or gap < 0.12:
-            return NOT_CLASSIFIED, f"{folder_label}={score:.3f}, gap={gap:.3f}"
-        return folder_label, f"{folder_label}={score:.3f}, gap={gap:.3f}"
+            if score < 0.55 or gap < 0.12:
+                return NOT_CLASSIFIED, f"{folder_label}={score:.3f}, gap={gap:.3f}"
+            return folder_label, f"{folder_label}={score:.3f}, gap={gap:.3f}"
+        except (OSError, ValueError, RuntimeError) as exc:
+            return NOT_CLASSIFIED, f"read/classify failed: {type(exc).__name__}"
 
     def sort_by_category(self):
         self.run_task("Sort by category", self._sort_by_category)
