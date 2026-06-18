@@ -17,7 +17,7 @@ from sklearn.cluster import DBSCAN
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 APP_NAME = "Photo Sorter"
-APP_VERSION = "2.0"
+APP_VERSION = "2.0 GPU"
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"}
 VIDEO_EXTENSIONS = {".mov", ".mp4", ".m4v", ".avi", ".mkv"}
@@ -30,8 +30,8 @@ PERSON = "people"
 CLIP_MODEL = "openai/clip-vit-large-patch14"
 PERSON_DETECTOR_MODEL = "facebook/detr-resnet-50"
 FACE_MODEL = "buffalo_l"
-PERSON_SCORE_THRESHOLD = 0.85
-CATEGORY_SCORE_THRESHOLD = 0.72
+PERSON_SCORE_THRESHOLD = 0.95
+CATEGORY_SCORE_THRESHOLD = 0.82
 CATEGORY_GAP_THRESHOLD = 0.20
 
 LABEL_PROMPTS = {
@@ -564,12 +564,30 @@ class PhotoSorterApp(ctk.CTk):
             return
         from transformers import pipeline
 
+        try:
+            import torch
+
+            use_cuda = torch.cuda.is_available()
+        except Exception:
+            use_cuda = False
+
+        device = 0 if use_cuda else -1
+        device_name = "GPU / CUDA" if use_cuda else "CPU"
+
         if self.person_detector is None:
-            self.log(f"Loading person detector: {PERSON_DETECTOR_MODEL}")
-            self.person_detector = pipeline("object-detection", model=PERSON_DETECTOR_MODEL)
+            self.log(f"Loading person detector: {PERSON_DETECTOR_MODEL} ({device_name})")
+            self.person_detector = pipeline(
+                "object-detection",
+                model=PERSON_DETECTOR_MODEL,
+                device=device,
+            )
         if self.clip_classifier is None:
-            self.log(f"Loading category model: {CLIP_MODEL}")
-            self.clip_classifier = pipeline("zero-shot-image-classification", model=CLIP_MODEL)
+            self.log(f"Loading category model: {CLIP_MODEL} ({device_name})")
+            self.clip_classifier = pipeline(
+                "zero-shot-image-classification",
+                model=CLIP_MODEL,
+                device=device,
+            )
 
     def detect_person(self, path: Path, threshold: float = PERSON_SCORE_THRESHOLD) -> tuple[bool, float]:
         result = self.person_detector(str(path))
@@ -638,13 +656,31 @@ class PhotoSorterApp(ctk.CTk):
             return
         from insightface.app import FaceAnalysis
 
-        self.log(f"Loading face model: {FACE_MODEL}")
-        app = FaceAnalysis(
-            name=FACE_MODEL,
-            allowed_modules=["detection", "recognition"],
-            providers=["CPUExecutionProvider"],
-        )
-        app.prepare(ctx_id=-1, det_size=(640, 640))
+        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+        self.log(f"Loading face model: {FACE_MODEL} (GPU preferred)")
+        try:
+            app = FaceAnalysis(
+                name=FACE_MODEL,
+                allowed_modules=["detection", "recognition"],
+                providers=providers,
+            )
+            app.prepare(ctx_id=0, det_size=(640, 640))
+            active_providers = []
+            for model in getattr(app, "models", {}).values():
+                session = getattr(model, "session", None)
+                if session is not None and hasattr(session, "get_providers"):
+                    active_providers.extend(session.get_providers())
+            provider_text = ", ".join(sorted(set(active_providers))) or "unknown provider"
+            self.log(f"Face model provider: {provider_text}")
+        except Exception as exc:
+            self.log(f"GPU face model failed, falling back to CPU: {type(exc).__name__}")
+            app = FaceAnalysis(
+                name=FACE_MODEL,
+                allowed_modules=["detection", "recognition"],
+                providers=["CPUExecutionProvider"],
+            )
+            app.prepare(ctx_id=-1, det_size=(640, 640))
+            self.log("Face model provider: CPUExecutionProvider")
         self.face_app = app
 
     @staticmethod
