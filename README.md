@@ -1,51 +1,50 @@
-# Photo Sorter
+<p align="center">
+  <img src="app.png" alt="Photo Sorter app screenshot" width="860">
+</p>
 
-**A local desktop app for organizing personal photo folders by date, visual category, and similar faces.**  
-**一个本地桌面照片整理工具，可按日期、视觉类别和相似人脸整理照片。**
+<h1 align="center">Photo Sorter</h1>
 
-![Photo Sorter screenshot](app.png)
+<p align="center">
+  一款本地端 Windows 桌面照片整理工具，可依日期、影像類別與相似人臉快速分類資料夾。
+</p>
 
-## Overview / 项目简介
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="Platform" src="https://img.shields.io/badge/Windows-Desktop-0078D4?style=for-the-badge&logo=windows&logoColor=white">
+  <img alt="UI" src="https://img.shields.io/badge/UI-CustomTkinter-2B2D42?style=for-the-badge">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-111827?style=for-the-badge">
+</p>
 
-Photo Sorter is a Windows-friendly Python desktop application built with CustomTkinter. It helps clean up messy photo folders without uploading your images to a cloud service. The app runs locally and uses computer vision models for category sorting and face grouping.
+---
 
-Photo Sorter 是一个适合 Windows 使用的 Python 桌面应用，使用 CustomTkinter 构建。它可以帮助你整理杂乱的照片文件夹，不需要把照片上传到云端。所有处理都在本机运行，并使用视觉模型进行类别分类和人脸分组。
+## 專案簡介
 
-## Key Features / 主要功能
+**Photo Sorter** 是一款以隱私優先為核心的照片整理工具。它會在你的電腦本機處理照片，不需要把私人影像上傳到雲端服務。
 
-- **Sort by date**: Move root-level images and videos into `YYYY-MM-DD` folders. Files without a detectable date go to `no_date`.
-- **按日期整理**：把第一层照片和视频移动到 `YYYY-MM-DD` 文件夹；无法识别日期的文件会进入 `no_date`。
+這個工具特別適合整理從手機、相機或舊備份資料夾匯出的雜亂照片。你可以用它把檔案依照拍攝日期、照片內容類別，或相似人臉進行分組。
 
-- **Sort by category**: Detect people first, then classify remaining images into user-defined labels such as `food`, `landscape`, and `document`.
-- **按类别整理**：先自动识别人物，再把其他图片分到用户定义的类别，例如 `food`、`landscape`、`document`。
+## 核心功能
 
-- **Group similar faces**: Copy images into `_face_groups/person_001`, `_face_groups/person_002`, and `no_face` using InsightFace embeddings.
-- **相似人脸分组**：使用 InsightFace 人脸特征，把照片复制到 `_face_groups/person_001`、`person_002` 和 `no_face`。
+| 功能 | 說明 | 檔案行為 |
+| --- | --- | --- |
+| 依日期整理 | 讀取 EXIF、檔案時間或媒體時間，建立 `YYYY-MM-DD` 資料夾 | 移動檔案 |
+| 依類別整理 | 先偵測人物，再依自訂類別如 `food, landscape, document` 分類 | 移動檔案 |
+| 相似人臉分組 | 使用人臉特徵把照片複製到 `person_001`、`person_002` 等群組 | 複製檔案 |
+| 無法判斷處理 | 沒有日期會進入 `no_date`，無法分類會進入 `not_classified` | 自動歸檔 |
 
-- **Local-first workflow**: No cloud upload is required. Your files stay on your computer.
-- **本地优先**：不需要云端上传，文件保留在你的电脑上。
+## 使用模型
 
-## Models / 使用模型
-
-Photo Sorter uses the following models:
-
-Photo Sorter 使用以下模型：
-
-| Purpose | Model |
+| 用途 | 模型 |
 | --- | --- |
-| Person detection / 人物检测 | `facebook/detr-resnet-50` |
-| Zero-shot image classification / 零样本图片分类 | `openai/clip-vit-large-patch14` |
-| Face recognition / 人脸识别 | `InsightFace buffalo_l` |
+| 人物偵測 | `facebook/detr-resnet-50` |
+| 圖片零樣本分類 | `openai/clip-vit-large-patch14` |
+| 人臉偵測與辨識 | `InsightFace buffalo_l` |
 
-For face grouping, only InsightFace detection and recognition modules are loaded. Landmark, age, and gender modules are not required.
+> 模型權重不會提交到 GitHub。首次執行相關功能時，程式可能會從 Hugging Face 或 InsightFace 下載模型快取。
 
-人物分组只载入 InsightFace 的 detection 和 recognition 模块，不需要 landmark、年龄或性别模块。
+## 安裝
 
-## Installation / 安装
-
-Python 3.11+ is recommended.
-
-建议使用 Python 3.11 或更新版本。
+建議使用 **Python 3.11 或以上版本**。
 
 ```powershell
 python -m venv .venv
@@ -54,109 +53,85 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## Run From Source / 从源码运行
-
-Run the CustomTkinter interface:
-
-运行 CustomTkinter 版本界面：
+## 從原始碼執行
 
 ```powershell
 python photo_sorter_ctk.py
 ```
 
-A basic Tkinter implementation is also available:
-
-项目也保留了一个基础 Tkinter 版本：
+專案也保留了基本 Tkinter 版本：
 
 ```powershell
 python photo_sorter_app.py
 ```
 
-The first run may download model weights from Hugging Face and InsightFace.
+## 使用方式
 
-首次运行可能会从 Hugging Face 和 InsightFace 下载模型权重。
+1. 選擇或貼上要整理的照片資料夾路徑。
+2. 如需依類別整理，可輸入分類清單，例如：
 
-## Usage / 使用方式
+```text
+food, landscape, document
+```
 
-1. Select or paste a target folder path.
-2. Optionally edit category labels, for example `food,landscape,document`.
-3. Run one of the three actions.
+3. 選擇其中一個功能開始整理：
 
-1. 选择或粘贴要整理的资料夹路径。
-2. 可按需要修改类别清单，例如 `food,landscape,document`。
-3. 点击三个功能之一开始整理。
-
-### Important File Behavior / 重要文件行为
-
-| Action | File behavior |
+| 按鈕 | 適合情境 |
 | --- | --- |
-| Sort by date / 按日期整理 | Moves files / 移动文件 |
-| Sort by category / 按类别整理 | Moves files / 移动文件 |
-| Group similar faces / 相似人脸分组 | Copies files / 复制文件 |
+| Sort by Date | 想先把照片依拍攝日期分好 |
+| Sort by Category | 想把人物、食物、風景、文件等內容分開 |
+| Group Similar Faces | 想把相似人物照片分組，方便後續人工確認 |
 
-Always test on a copied folder before processing important originals.
+> 建議先用複製出來的測試資料夾執行，確認分類結果符合需求後，再處理重要原始照片。
 
-处理重要原始照片前，建议先复制一份测试资料夹。
+## 建立 Windows EXE
 
-## Build A Windows Release / 构建 Windows 发行版
-
-Install PyInstaller:
-
-安装 PyInstaller：
+安裝 PyInstaller：
 
 ```powershell
 python -m pip install pyinstaller
 ```
 
-Build the app:
-
-构建应用：
+建立可執行版本：
 
 ```powershell
 pyinstaller --noconfirm PhotoSorterTool.spec
 ```
 
-The output will be created at:
-
-输出目录：
+輸出位置：
 
 ```text
-dist/PhotoSorterTool
+dist/PhotoSorterTool/PhotoSorterTool.exe
 ```
 
-Keep the full release folder together. Do not distribute only the `.exe` if you bundle libraries or models.
+PyInstaller 的 `onedir` 模式會產生一個完整資料夾。發佈時請保留整個 `PhotoSorterTool` 資料夾，不要只複製單一 `.exe`。
 
-请保留完整发行资料夹。如果你打包了库或模型，不要只发布单独的 `.exe`。
+## 模型與大型檔案
 
-## Bundling Models / 打包模型
+此 repository 不包含模型權重、EXE、build output 或大型快取檔案。這些檔案已透過 `.gitignore` 排除。
 
-This repository does not include model weights.
-
-本仓库不包含模型权重。
-
-For an offline release, place model caches under:
-
-如果需要离线发行版，可把模型缓存放到：
+常見本機模型快取位置：
 
 ```text
-models/huggingface
-models/insightface
+C:\Users\<you>\.cache\huggingface\hub
+C:\Users\<you>\.insightface\models
 ```
 
-When frozen with PyInstaller, the app checks for bundled model folders next to the app resources.
+如果要製作離線版本，可自行把模型放入 release package，但不建議提交到 GitHub repository。
 
-使用 PyInstaller 打包后，应用会优先查找随程序一起发布的模型资料夹。
-
-## Repository Contents / 仓库内容
+## 專案結構
 
 ```text
-photo_sorter_ctk.py      # Main CustomTkinter app / 主界面
-photo_sorter_app.py      # Basic Tkinter fallback / 基础 Tkinter 版本
-PhotoSorterTool.spec     # PyInstaller build file / 打包配置
-requirements.txt         # Python dependencies / Python 依赖
-app.png                  # Screenshot used in README / README 截图
+photo-sorter/
+├─ photo_sorter_ctk.py      # 主要 CustomTkinter 介面
+├─ photo_sorter_app.py      # 基本 Tkinter 備用版本
+├─ PhotoSorterTool.spec     # PyInstaller 打包設定
+├─ requirements.txt         # Python 依賴套件
+├─ app.png                  # README 截圖
+├─ .gitignore               # 忽略 build、exe、模型與快取
+└─ README.md
 ```
 
-## License / 许可证
+## 授權
 
-MIT
+MIT License

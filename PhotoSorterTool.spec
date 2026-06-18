@@ -11,14 +11,14 @@ hiddenimports = [
     "timm",
 ]
 
-for package in ("insightface", "onnxruntime", "timm"):
+for package in ("customtkinter", "darkdetect", "insightface", "onnxruntime", "timm"):
     pkg_datas, pkg_binaries, pkg_hiddenimports = collect_all(package)
     datas += pkg_datas
     binaries += pkg_binaries
     hiddenimports += pkg_hiddenimports
 
 a = Analysis(
-    ["photo_sorter_app.py"],
+    ["photo_sorter_ctk.py"],
     pathex=[],
     binaries=binaries,
     datas=datas,

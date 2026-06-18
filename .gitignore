@@ -12,9 +12,20 @@ env/
 build/
 dist/
 *.spec.bak
+*.exe
+*.msi
+*.zip
+*.7z
+*.rar
 
 # Local model caches and large artifacts
+model/
 models/
+huggingface/
+hf_cache/
+insightface/
+.cache/
+.insightface/
 *.onnx
 *.safetensors
 *.bin
